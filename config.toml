@@ -1,0 +1,22 @@
+[Ports]
+sequence    =   ["A0","B0","SUM0","SUM1","SUM2","SUM3","COUT","A1","A2","A3","B1","B2","B3","CIN","clk"]
+inputs      =   ["A0","B0","A1","A2","A3","B1","B2","B3","CIN"]
+outputs     =   ["SUM0","SUM1","SUM2","SUM3"]
+clockname   =   "clk"
+
+[TestPattern]
+exhaustive  =   true
+usevecfile  =   false
+vecfilepath =   "testpattern.vec"
+pattern     =   [ "00", "01", "10", "11" ]
+
+[Files]
+toppath     =   "mymodule.v"
+outdirpath  =   "build"
+
+[TestbenchParams]
+tbname      =   "Testbench"
+topname     =   "HalfAdder"
+timescale   =   "1ps/100fs"
+clkperiod   =   20
+simlength   =   1000
