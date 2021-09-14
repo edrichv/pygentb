@@ -5,18 +5,20 @@ outputs     =   ["SUM0","SUM1","SUM2","SUM3"]
 clockname   =   "clk"
 
 [TestPattern]
-exhaustive  =   true
-usevecfile  =   false
+exhaustive  =   false
+usevecfile  =   true
 vecfilepath =   "testpattern.vec"
 pattern     =   [ "00", "01", "10", "11" ]
+bpdelay     =   10 #(B)etween (P)ulse delay
+acdelay     =   10 #(A)fter (C)lock delay
 
 [Files]
-toppath     =   "mymodule.v"
+toppath     =   "ksa4.v"
 outdirpath  =   "build"
 
 [TestbenchParams]
 tbname      =   "Testbench"
-topname     =   "HalfAdder"
+topname     =   "KSA4"
 timescale   =   "1ps/100fs"
-clkperiod   =   20
-simlength   =   1000
+clkperiod   =   40
+simlength   =   10000

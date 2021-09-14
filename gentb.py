@@ -18,6 +18,8 @@ def write_tb(tomldata: dict):
     usevecfile = tomldata["TestPattern"]["usevecfile"]
     patternsfromdata = tomldata["TestPattern"]["pattern"]
     vecfilepath = tomldata["TestPattern"]["vecfilepath"]
+    bpdelay = tomldata["TestPattern"]["bpdelay"]
+    acdelay = tomldata["TestPattern"]["acdelay"]
 
     tbfilepath = f"{tbname.lower()}.v"
 
@@ -61,7 +63,7 @@ def write_tb(tomldata: dict):
         f.write("\n")
 
         f.write("initial begin\n")
-        f.write("\t#(CLK_PERIOD + 10);\n")
+        f.write(f"\t#(CLK_PERIOD + {acdelay});\n")
         f.write(f"\t// {' '.join(invec)}\n")
 
         for pattern in patterns:
@@ -69,7 +71,7 @@ def write_tb(tomldata: dict):
             for i in range(len(invec)):
                 if pattern[i] == "1":
                     f.write(f"\t{invec[i]}=~{invec[i]};\n")
-            f.write("\t#(2*CLK_PERIOD);\n")
+            f.write(f"\t#({bpdelay}*CLK_PERIOD);\n")
         f.write("end\n")
         f.write("\n")
 
@@ -104,7 +106,8 @@ def pat_from_file(filepath):
             else:
                 pat.append(list(line))
 
-def run_process(cmd: str, cwd: str):
+def run_process(cmd: str, cwd: str, desc: str):
+    print(desc)
     proc = subprocess.Popen(args=cmd.split(" "), cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
     if len(stdout) > 0: print(stdout.decode("utf-8"))
@@ -121,9 +124,9 @@ def run_sim(tomldata: dict):
 
     tboutfile = f"{outpath}/{tbname}.v.out"
     cmd = f"iverilog -o {tboutfile} {tbname}.v"
-    run_process(cmd, ".")
+    run_process(cmd, ".", "Running iverilog")
     cmd = f"vvp {tbname}.v.out"
-    run_process(cmd, outpath)
+    run_process(cmd, outpath, "Running simulation")
     errorfile_path = '/'.join([outpath,"errors.txt"])
     if os.path.isfile(errorfile_path): 
         log("ERROR: ", color=bcolors.FAIL, end="")

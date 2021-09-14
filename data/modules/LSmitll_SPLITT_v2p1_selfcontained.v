@@ -15,16 +15,19 @@
 // (c) 2016-2018 Stellenbosch University
 // ---------------------------------------------------------------------------
 `timescale 1ps/100fs
-module LSmitll_SPLITT_v2p1_optimized (a, q0, q1);
+module LSmitll_SPLITT_v2p1_optimized (a, q, m);
 
 input
   a;
 
 output
-  q0, q1;
+  q, m;
 
 reg
   q0, q1;
+
+assign q = q0;
+assign m = q1;
 
 real
   delay_state0_a_q0 = 7.3,
