@@ -1,7 +1,8 @@
 import toml
 import os
 import subprocess
-from logger import bcolors, log
+from src.logger import bcolors, log
+import sys
 
 def write_tb(tomldata: dict):
     toppath = tomldata["Files"]["toppath"]
@@ -140,7 +141,10 @@ def run_sim(tomldata: dict):
         log("SUCCESS: ", color=bcolors.OKGREEN, end="")
         log("Simulation completed without errors")
 
-if __name__ == "__main__":
-    tomldata = toml.load("config.toml")
+def main(configfilepath):
+    tomldata = dict(toml.load(configfilepath))
     write_tb(tomldata)
     run_sim(tomldata)
+
+if __name__ == "__main__":
+    main(sys.argv[1])

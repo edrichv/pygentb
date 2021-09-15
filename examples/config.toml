@@ -7,13 +7,13 @@ clockname   =   "clk"
 [TestPattern]
 exhaustive  =   false
 usevecfile  =   true
-vecfilepath =   "testpattern.vec"
+vecfilepath =   "./examples/testpattern.vec"
 pattern     =   [ "00", "01", "10", "11" ]
 bpdelay     =   10 #(B)etween (P)ulse delay
 acdelay     =   10 #(A)fter (C)lock delay
 
 [Files]
-toppath     =   "ksa4.v"
+toppath     =   "./examples/ksa4.v"
 outdirpath  =   "build"
 
 [TestbenchParams]

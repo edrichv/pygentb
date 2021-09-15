@@ -1,4 +1,4 @@
-import gentb
+import src.gentb
 import timeit
 
 tests = ['''
