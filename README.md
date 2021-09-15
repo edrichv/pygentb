@@ -9,7 +9,7 @@
 ## Installation
 In root directory :
 ```
-python3 -m pip install -r requirements.txt --user
+python3 -m pip install -r requirements.txt
 ```
 
 ## How to run
