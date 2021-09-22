@@ -1,2 +1,4 @@
+hdlparse==1.0.4
 lit==0.5.1
-toml==0.10.2
+PyYAML==5.4.1
+tornado==6.1

@@ -1,70 +1,72 @@
-import toml
+from src.configdata import ConfigData
+from typing import Sequence
+import yaml
 import os
 import subprocess
 from src.logger import bcolors, log
 import sys
+import re
+import hdlparse.verilog_parser as vlog
+from src.configdata import ConfigData
+from random import random, seed
 
-def write_tb(tomldata: dict):
-    toppath = tomldata["Files"]["toppath"]
-    invec = tomldata["Ports"]["inputs"]
-    outvec = tomldata["Ports"]["outputs"]
-    port_sequence = tomldata["Ports"]["sequence"]
-    clockname = tomldata["Ports"]["clockname"]
-    topname = tomldata["TestbenchParams"]["topname"]
-    tbname = tomldata["TestbenchParams"]["tbname"]
-    timescale = tomldata["TestbenchParams"]["timescale"]
-    clkperiod = tomldata["TestbenchParams"]["clkperiod"]
-    simlength = tomldata["TestbenchParams"]["simlength"]
-    exhaustive_tp = tomldata["TestPattern"]["exhaustive"]
-    usevecfile = tomldata["TestPattern"]["usevecfile"]
-    patternsfromdata = tomldata["TestPattern"]["pattern"]
-    vecfilepath = tomldata["TestPattern"]["vecfilepath"]
-    bpdelay = tomldata["TestPattern"]["bpdelay"]
-    acdelay = tomldata["TestPattern"]["acdelay"]
+def write_tb(config: ConfigData):
 
-    tbfilepath = f"{tbname.lower()}.v"
+    tbfilepath = f"testbench.v"
 
-    if exhaustive_tp:
-        patterns = gen_ex_pat(len(invec))
-    elif usevecfile:
-        patterns = pat_from_file(vecfilepath)
-    else:
-        patterns = list()
-        for _str in patternsfromdata:
-            patterns.append(list(_str))
+    invec = list()
+    outvec = list()
+    seq = list()
+
+    vlog_ex = vlog.VerilogExtractor()
+    vlog_mods = vlog_ex.extract_objects(config.toppath)
+    for m in vlog_mods:
+        modulename = m.name
+        for p in m.ports:
+            seq.append(p.name)
+            if p.mode == "input":
+                if not p.name == config.clockname:
+                    invec.append(p.name)
+            elif p.mode == "output":
+                outvec.append(p.name)
+
+    patterns = get_test_pats(config, len(invec))
 
     with open(tbfilepath, "w"): pass
     with open(tbfilepath, "a") as f:
-        f.write(f"`include \"{toppath}\"\n")
-        f.write(f"`timescale {timescale}\n")
+        f.write(f"`include \"{config.toppath}\"\n")
+        f.write(f"`timescale {config.timescale}\n")
         f.write(f"\n")
 
-        f.write(f"module {tbname};\n")
+        f.write(f"module Testbench;\n")
         f.write("reg\n")
         newvec = list()
         for _in in invec:
             newvec.append(f"{_in}=0")
-        f.write(f"\t{clockname}=0,{','.join(newvec)};\n")
+        f.write(f"\tclk=0,{','.join(newvec)};\n")
         f.write("wire\n")
         f.write(f"\t{','.join(outvec)};\n")
         f.write(f"\n")
 
-        portlist = ','.join(port_sequence)
-        f.write(f"{topname} dut ({portlist});\n")
+        portlist = ""
+        for port in seq:
+            portlist += f"\n\t.{port}({port}),"
+        portlist = portlist[:-1] + "\n"
+        f.write(f"{modulename} dut ({portlist});\n")
         f.write("\n")
 
-        f.write(f"localparam CLK_PERIOD = {str(clkperiod)};\n")
-        f.write(f"always #CLK_PERIOD {clockname}=~{clockname};\n")
+        f.write(f"localparam CLK_PERIOD = {str(config.clkperiod)};\n")
+        f.write(f"always #CLK_PERIOD {config.clockname}=~{config.clockname};\n")
         f.write("\n")
 
         f.write("initial begin\n")
-        f.write(f"\t$dumpfile(\"{tbname.lower()}.vcd\");\n")
+        f.write(f"\t$dumpfile(\"testbench.vcd\");\n")
         f.write("\t$dumpvars(0, dut);\n")
         f.write("end\n")
         f.write("\n")
 
         f.write("initial begin\n")
-        f.write(f"\t#(CLK_PERIOD + {acdelay});\n")
+        f.write(f"\t#(CLK_PERIOD + {config.acdelay});\n")
         f.write(f"\t// {' '.join(invec)}\n")
 
         for pattern in patterns:
@@ -72,15 +74,31 @@ def write_tb(tomldata: dict):
             for i in range(len(invec)):
                 if pattern[i] == "1":
                     f.write(f"\t{invec[i]}=~{invec[i]};\n")
-            f.write(f"\t#({bpdelay}*CLK_PERIOD);\n")
+            f.write(f"\t#({config.bpdelay}*CLK_PERIOD);\n")
         f.write("end\n")
         f.write("\n")
 
         f.write("initial begin\n")
-        f.write(f"\t#{simlength} $finish;\n")
+        f.write(f"\t#{config.simlength} $finish;\n")
         f.write("end\n")
         f.write("\n")
         f.write("endmodule")
+
+def get_test_pats(config: ConfigData, n_inputs: int):
+    if config.tp_type == "exhaustive":
+        return gen_ex_pat(n_inputs)
+    elif config.tp_type == "vecfile":
+        return pat_from_file(config.vecfilepath)
+    elif config.tp_type == "random":
+        return gen_rand_pat(n_inputs, config)
+    elif config.tp_type == "specific":
+        return [list(config.pattern)]
+    else:
+        return gen_rand_pat(n_inputs, config)
+
+def gen_rand_pat(numinputs: int, config: ConfigData):
+    seed(config.seed)
+    return [[str(round(random())) for _ in range(numinputs)] for _ in range(config.numrandom)]
 
 def gen_ex_pat(numinputs: int):
     cnts = ["0" for _ in range(numinputs)]
@@ -114,21 +132,18 @@ def run_process(cmd: str, cwd: str, desc: str):
     if len(stdout) > 0: print(stdout.decode("utf-8"))
     if len(stderr) > 0: print(stderr.decode("utf-8"))
 
-def run_sim(tomldata: dict):
-    outpath = tomldata["Files"]["outdirpath"]
-    tbname = tomldata["TestbenchParams"]["tbname"].lower()
+def run_sim(config: ConfigData):
+    if not os.path.isdir(config.outpath): 
+        os.makedirs(config.outpath)
+    for _file in os.listdir(config.outpath):
+        os.remove('/'.join([config.outpath,_file]))
 
-    if not os.path.isdir(outpath): 
-        os.makedirs(outpath)
-    for _file in os.listdir(outpath):
-        os.remove('/'.join([outpath,_file]))
-
-    tboutfile = f"{outpath}/{tbname}.v.out"
-    cmd = f"iverilog -o {tboutfile} {tbname}.v"
+    tboutfile = f"{config.outpath}/testbench.v.out"
+    cmd = f"iverilog -o {tboutfile} testbench.v"
     run_process(cmd, ".", "Running iverilog")
-    cmd = f"vvp {tbname}.v.out"
-    run_process(cmd, outpath, "Running simulation")
-    errorfile_path = '/'.join([outpath,"errors.txt"])
+    cmd = f"vvp testbench.v.out"
+    run_process(cmd, config.outpath, "Running simulation")
+    errorfile_path = '/'.join([config.outpath,"errors.txt"])
     if os.path.isfile(errorfile_path): 
         log("ERROR: ", color=bcolors.FAIL, end="")
         log("Critical timing violations detected:")
@@ -142,9 +157,10 @@ def run_sim(tomldata: dict):
         log("Simulation completed without errors")
 
 def main(configfilepath):
-    tomldata = dict(toml.load(configfilepath))
-    write_tb(tomldata)
-    run_sim(tomldata)
+    with open(configfilepath, "r") as file:
+        configdata = ConfigData(yaml.load(file, Loader=yaml.FullLoader))
+    write_tb(configdata)
+    run_sim(configdata)
 
 if __name__ == "__main__":
     main(sys.argv[1])

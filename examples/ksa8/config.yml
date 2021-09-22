@@ -1,0 +1,16 @@
+TestPattern:
+  type: specific # Choose: random, vecfile, exhaustive, specific
+  seed: 1000
+  numrandom: 10
+  pattern: "11111111111111111"
+  bpdelay: 50  #(B)etween (P)ulse delay (measured in clock cycles)
+  acdelay: 50 #(A)fter (C)lock delay (measured in timesteps)
+Files:
+  vecfilepath: /home/edrich/github/pygentb/examples/ksa8/testpattern.vec
+  toppath: /home/edrich/github/pygentb/examples/ksa8/ksa8.v
+  outpath: build
+TestbenchParams:
+  clockname: clk
+  timescale: 1ps/100fs
+  clkperiod: 100
+  simlength: 20000
