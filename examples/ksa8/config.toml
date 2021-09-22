@@ -1,0 +1,18 @@
+[TestPattern]
+type = "specific"
+seed = 1000
+numrandom = 10
+pattern = "11111111111111111"
+bpdelay = 50
+acdelay = 50
+
+[Files]
+vecfilepath = "examples/ksa8/testpattern.vec"
+toppath = "examples/ksa8/ksa8.v"
+outpath = "build"
+
+[TestbenchParams]
+clockname = "clk"
+timescale = "1ps/100fs"
+clkperiod = 100
+simlength = 20000

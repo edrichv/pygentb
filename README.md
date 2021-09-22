@@ -19,7 +19,7 @@ python3 run.py <config_file_path>
 
 ## Example
 ```
-python3 run.py ./examples/ksa4/config.yml
+python3 run.py ./examples/ksa4/config.toml
 gtkwave ./build/testbench.vcd
 ```
 Output is stored in the directory defined by the `outdir` key in the specified config.toml

@@ -1,0 +1,18 @@
+[TestPattern]
+type = "random"
+numrandom = 10
+seed = 24352432
+pattern = "11111111"
+bpdelay = 10
+acdelay = 10
+
+[Files]
+vecfilepath = "examples/ksa4/testpattern.vec"
+toppath = "examples/ksa4/ksa4.v"
+outpath = "build"
+
+[TestbenchParams]
+clockname = "clk"
+timescale = "1ps/100fs"
+clkperiod = 40
+simlength = 10000

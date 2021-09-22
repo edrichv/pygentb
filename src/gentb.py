@@ -1,6 +1,6 @@
 from src.configdata import ConfigData
 from typing import Sequence
-import yaml
+import toml
 import os
 import subprocess
 from src.logger import bcolors, log
@@ -157,8 +157,7 @@ def run_sim(config: ConfigData):
         log("Simulation completed without errors")
 
 def main(configfilepath):
-    with open(configfilepath, "r") as file:
-        configdata = ConfigData(yaml.load(file, Loader=yaml.FullLoader))
+    configdata = ConfigData(dict(toml.load(configfilepath)))
     write_tb(configdata)
     run_sim(configdata)
 
