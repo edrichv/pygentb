@@ -6,8 +6,8 @@ TestPattern:
   bpdelay: 10 #(B)etween (P)ulse delay (measured in clock cycles)
   acdelay: 10 #(A)fter (C)lock delay (measured in timesteps)
 Files:
-  vecfilepath: /home/edrich/github/pygentb/examples/ksa4/testpattern.vec
-  toppath: /home/edrich/github/pygentb/examples/ksa4/ksa4.v
+  vecfilepath: examples/ksa4/testpattern.vec
+  toppath: examples/ksa4/ksa4.v
   outpath: build
 TestbenchParams:
   clockname: clk
