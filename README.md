@@ -14,12 +14,12 @@ python3 -m pip install -r requirements.txt
 
 ## How to run
 ```
-python3 run.py <config_toml_path> 
+python3 run.py <config_file_path> 
 ```
 
 ## Example
 ```
-python3 run.py ./examples/ksa4/config.toml
+python3 run.py ./examples/ksa4/config.yml
 gtkwave ./build/testbench.vcd
 ```
 Output is stored in the directory defined by the `outdir` key in the specified config.toml
