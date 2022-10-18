@@ -7,7 +7,6 @@ from src.logger import bcolors, log
 import sys
 import re
 import hdlparse.verilog_parser as vlog
-from src.configdata import ConfigData
 from random import random, seed
 
 def write_tb(config: ConfigData):
@@ -66,7 +65,7 @@ def write_tb(config: ConfigData):
         f.write("\n")
 
         f.write("initial begin\n")
-        f.write(f"\t#(CLK_PERIOD + {config.acdelay});\n")
+        f.write(f"\t#{config.idelay};\n")
         f.write(f"\t// {' '.join(invec)}\n")
 
         for pattern in patterns:
