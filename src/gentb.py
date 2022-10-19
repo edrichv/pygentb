@@ -65,7 +65,7 @@ def write_tb(config: ConfigData):
         f.write("\n")
 
         f.write("initial begin\n")
-        f.write(f"\t#1.5*CLK_PERIOD + {config.clkdelay};\n")
+        f.write(f"\t#(1.5*CLK_PERIOD + {config.clkdelay});\n")
         f.write(f"\t// {' '.join(invec)}\n")
 
         for pattern in patterns:
