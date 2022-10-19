@@ -5,7 +5,7 @@ class ConfigData:
         self.numrandom = data["TestPattern"]["numrandom"]
         self.pattern = data["TestPattern"]["pattern"]
         self.seed = data["TestPattern"]["seed"]
-        self.idelay = data["TestPattern"]["idelay"]
+        self.clkdelay = data["TestPattern"]["clkdelay"]
         self.vecfilepath = data["Files"]["vecfilepath"]
         self.toppath = data["Files"]["toppath"]
         self.outpath = data["Files"]["outpath"]
